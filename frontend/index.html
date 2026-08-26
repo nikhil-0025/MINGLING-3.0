@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mingling | Privacy-First Real-Time Messaging</title>
+  <meta name="description"
+    content="Instant real-time messaging without accounts, email verification, or phone numbers. Chat freely and stay private.">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/landing.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+
+  <!-- Font Awesome CDN Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+  <!-- 1. FLOATING ROUNDED NAVBAR (mx-7xl) -->
+  <nav class="navbar">
+    <a href="index.html" class="brand-logo">
+      <div class="brand-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
+      <span>Mingling</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features" class="nav-link">Features</a></li>
+      <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+      <li><a href="#privacy" class="nav-link">Privacy</a></li>
+      <li><a href="#use-cases" class="nav-link">Use Cases</a></li>
+      <li><a href="#faq" class="nav-link">FAQ</a></li>
+    </ul>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <!-- Light / Dark Mode Toggle Button -->
+      <button id="theme-toggle-btn" class="btn btn-glass btn-icon" title="Toggle Light / Dark Mode"
+        style="width:38px; height:38px;">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <a href="saved-chats.html" class="btn btn-glass btn-sm"><i class="fa-solid fa-bookmark"></i> Saved Chats</a>
+      <a href="room.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-bolt"></i> Start Mingling</a>
+
+    </div>
+  </nav>
+
+  <!-- 2. HERO SECTION -->
+  <section class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i class="fa-solid fa-shield-halved"></i> 100% Anonymous & Ephemeral
+        </div>
+        <h1 class="hero-title">Chat Freely.<br><span class="text-gradient">Stay Private.</span></h1>
+        <p class="hero-subtitle">Instant real-time messaging without accounts or unnecessary data collection. Open the
+          site, jump into a room, and start chatting right away.</p>
+        <div class="hero-actions">
+          <a href="room.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Start Mingling</a>
+          <a href="#how-it-works" class="btn btn-secondary"><i class="fa-solid fa-circle-play"></i> How It Works</a>
+        </div>
+      </div>
+
+      <!-- Floating Preview Card -->
+      <div class="glass-card hero-preview-card">
+        <div class="preview-chat-header">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span class="status-dot online"></span>
+            <strong>#General-Room</strong>
+          </div>
+          <span class="badge badge-ephemeral"><i class="fa-regular fa-clock"></i> Expiring in 24h</span>
+        </div>
+        <div class="preview-message">
+          <div class="bubble bubble-incoming">
+            <small style="color:var(--brand-primary); font-weight:700;">Mingling User #4821</small>
+            <p>Hey! No sign up required for this room?</p>
+          </div>
+          <div class="bubble bubble-outgoing">
+            <small style="opacity:0.8; font-weight:700;">You (Nikhil)</small>
+            <p>Nope! Completely instant and private. Messages self-destruct unless saved!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. FEATURES -->
+  <section id="features" class="section">
+    <div class="section-header">
+      <h2 class="section-title">Built for Modern Privacy</h2>
+      <p class="section-desc">Everything you need for seamless temporary and saved communication.</p>
+    </div>
+    <div class="features-grid">
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-user-ninja"></i></div>
+        <h3 class="feature-title">Zero Registration</h3>
+        <p class="text-muted">No email, phone number, or password required. Get an instant anonymous session instantly.
+        </p>
+      </div>
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+        <h3 class="feature-title">Real-Time Messaging</h3>
+        <p class="text-muted">Powered by Socket.IO with typing indicators, online presence, delivered, and read
+          receipts.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-fire"></i></div>
+        <h3 class="feature-title">Self-Destruct Rooms</h3>
+        <p class="text-muted">Temporary conversations automatically wipe from memory and database when room timer
+          expires.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-lock"></i></div>
+        <h3 class="feature-title">Password Protection</h3>
+        <p class="text-muted">Lock your private rooms with encrypted passwords and share custom join codes securely.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-bookmark"></i></div>
+        <h3 class="feature-title">Explicit Saved Chats</h3>
+        <p class="text-muted">Choose to save important conversations to MongoDB Atlas and export them anytime in
+          JSON/TXT.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+        <h3 class="feature-title">Built-In AI Assistant</h3>
+        <p class="text-muted">Summarize long chats, check grammar, translate messages, and generate smart replies on
+          demand.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. HOW IT WORKS -->
+  <section id="how-it-works" class="section">
+    <div class="section-header">
+      <h2 class="section-title">How Mingling Works</h2>
+      <p class="section-desc">3 simple steps to start chatting privately in seconds.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="glass-card step-card">
+        <span class="step-number">01</span>
+        <h3 style="margin-bottom:0.75rem;">Open Mingling</h3>
+        <p class="text-muted">Your browser generates a secure temporary session, random nickname, and avatar
+          automatically.</p>
+      </div>
+      <div class="glass-card step-card">
+        <span class="step-number">02</span>
+        <h3 style="margin-bottom:0.75rem;">Create or Join Room</h3>
+        <p class="text-muted">Set up a room, customize expiration, or share a QR code/link with your friends or
+          colleagues.</p>
+      </div>
+      <div class="glass-card step-card">
+        <span class="step-number">03</span>
+        <h3 style="margin-bottom:0.75rem;">Chat & Auto-Purge</h3>
+        <p class="text-muted">Enjoy real-time chat. Messages disappear when room expires unless you explicitly hit Save.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. PRIVACY FIRST -->
+  <section id="privacy" class="section">
+    <div class="privacy-banner">
+      <div>
+        <h2 style="font-size:2.2rem; margin-bottom:1rem;">Your Data belongs to YOU.</h2>
+        <p class="text-muted" style="margin-bottom:1.5rem;">Unlike traditional messaging apps that log metadata, store
+          perpetual histories, and demand personal phone numbers, Mingling is designed around ephemeral session
+          destruction.</p>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <div><i class="fa-solid fa-check text-gradient" style="margin-right:0.5rem;"></i> No tracker cookies or
+            third-party ad scripts</div>
+          <div><i class="fa-solid fa-check text-gradient" style="margin-right:0.5rem;"></i> Redis TTL session
+            destruction upon disconnect</div>
+          <div><i class="fa-solid fa-check text-gradient" style="margin-right:0.5rem;"></i> Explicit user consent before
+            saving any conversation</div>
+        </div>
+      </div>
+      <div class="glass-card" style="padding:2rem; text-align:center;">
+        <i class="fa-solid fa-user-shield" style="font-size:4rem; color:var(--brand-primary); margin-bottom:1rem;"></i>
+        <h3>Zero Data Fingerprinting</h3>
+        <p class="text-muted" style="font-size:0.9rem; margin-top:0.5rem;">IP hashes are strictly used for DDoS
+          protection and automatically rotated.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. WHY MINGLING -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Why Choose Mingling?</h2>
+      <p class="section-desc">Comparing traditional platforms with privacy-first messaging.</p>
+    </div>
+    <div class="glass-card" style="padding:2rem; overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; text-align:left;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border-glass);">
+            <th style="padding:1rem;">Feature</th>
+            <th style="padding:1rem; color:var(--brand-primary);">Mingling</th>
+            <th style="padding:1rem; color:var(--text-dim);">Traditional Messaging</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border-glass);">
+            <td style="padding:1rem;">Registration Required</td>
+            <td style="padding:1rem; color:var(--color-success); font-weight:700;">No (Instant Anonymous)</td>
+            <td style="padding:1rem; color:var(--color-error);">Yes (Phone / Email)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-glass);">
+            <td style="padding:1rem;">Message Retention</td>
+            <td style="padding:1rem; color:var(--color-success); font-weight:700;">Ephemeral Self-Destruct</td>
+            <td style="padding:1rem; color:var(--color-error);">Stored Permanently</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border-glass);">
+            <td style="padding:1rem;">Room Security</td>
+            <td style="padding:1rem; color:var(--color-success); font-weight:700;">Password + Expiration TTL</td>
+            <td style="padding:1rem; color:var(--text-muted);">Standard Invite Link</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. USE CASES -->
+  <section id="use-cases" class="section">
+    <div class="section-header">
+      <h2 class="section-title">Endless Possibilities</h2>
+      <p class="section-desc">Perfect for quick team syncs, confidential discussions, or event temporary groups.</p>
+    </div>
+    <div class="features-grid">
+      <div class="glass-card feature-card">
+        <h3 class="feature-title"><i class="fa-solid fa-laptop-code"></i> Developer Handoffs</h3>
+        <p class="text-muted">Share code snippets, temporary tokens, or staging credentials without leaving permanent
+          logs.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <h3 class="feature-title"><i class="fa-solid fa-users"></i> Gaming & Events</h3>
+        <p class="text-muted">Create a 1-click room for your match squad or conference attendees with QR code entry.</p>
+      </div>
+      <div class="glass-card feature-card">
+        <h3 class="feature-title"><i class="fa-solid fa-user-secret"></i> Confidential Chats</h3>
+        <p class="text-muted">Discuss sensitive topics with full confidence that messages disappear when closed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. TESTIMONIALS -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Loved by Privacy Enthusiasts</h2>
+    </div>
+    <div class="features-grid">
+      <div class="glass-card feature-card">
+        <p style="font-style:italic; margin-bottom:1rem;">"Finally an instant messaging tool that doesn't demand my
+          phone number or log my conversations forever."</p>
+        <strong style="color:var(--brand-primary);">Alex R. - Tech Lead</strong>
+      </div>
+      <div class="glass-card feature-card">
+        <p style="font-style:italic; margin-bottom:1rem;">"The QR code join + self-destruct timers make event group
+          coordination super effortless."</p>
+        <strong style="color:var(--brand-primary);">Sophia M. - Event Organizer</strong>
+      </div>
+      <div class="glass-card feature-card">
+        <p style="font-style:italic; margin-bottom:1rem;">"The explicit saved chats feature is great! I keep what I need
+          and everything else evaporates."</p>
+        <strong style="color:var(--brand-primary);">David K. - Security Researcher</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. FAQ -->
+  <section id="faq" class="section">
+    <div class="section-header">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="glass-card faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question"><span>Do I need to sign up or create an account?</span> <i
+            class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">No! You receive a temporary session token the moment you land on the page. You can
+          customize your nickname anytime.</div>
+      </div>
+      <div class="glass-card faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question"><span>Are my messages really deleted when the room expires?</span> <i
+            class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">Yes. Temporary messages are kept in Redis and ephemeral storage with automatic TTL
+          expiration. Once expired, they are completely purged.</div>
+      </div>
+      <div class="glass-card faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-question"><span>How does Saved Chats work?</span> <i class="fa-solid fa-chevron-down"></i></div>
+        <div class="faq-answer">If you explicitly click "Save Conversation", a snapshot is preserved in MongoDB under
+          your session token so you can revisit or export it later.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. FOOTER -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="brand-logo" style="margin-bottom:1rem;">
+          <div class="brand-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
+          <span>Mingling</span>
+        </a>
+        <p class="text-muted" style="font-size:0.9rem;">Privacy-first real-time messaging platform built for fast,
+          secure, and ephemeral communication.</p>
+      </div>
+      <div>
+        <h4 style="margin-bottom:1rem;">App</h4>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem;">
+          <li><a href="room.html" class="nav-link">Create Room</a></li>
+          <li><a href="saved-chats.html" class="nav-link">Saved Chats</a></li>
+          <li><a href="settings.html" class="nav-link">Settings</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="margin-bottom:1rem;">Security</h4>
+        <p class="text-muted" style="font-size:0.85rem;">Zero permanent tracking. Ephemeral data cleanup.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Mingling. All rights reserved. Privacy First Messaging Platform.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>

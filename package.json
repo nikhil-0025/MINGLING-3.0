@@ -1,0 +1,22 @@
+{
+  "name": "mingling",
+  "version": "1.0.0",
+  "description": "Privacy-first real-time messaging web application",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "postinstall": "cd backend && npm install"
+  },
+  "keywords": [
+    "real-time",
+    "chat",
+    "privacy",
+    "socket.io",
+    "mongodb",
+    "redis",
+    "vanilla-js"
+  ],
+  "author": "Mingling Team",
+  "license": "MIT"
+}

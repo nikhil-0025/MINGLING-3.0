@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mingling | Real-Time Chat</title>
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <div class="chat-app-container">
+    <!-- 1. Left Sidebar Navigation -->
+    <aside class="chat-icon-sidebar">
+      <a href="index.html" class="sidebar-logo"><i class="fa-solid fa-comments"></i></a>
+      <ul class="sidebar-nav-list">
+        <li><a href="room.html" class="sidebar-nav-item" title="Rooms"><i class="fa-solid fa-plus"></i></a></li>
+        <li><a href="chat.html" class="sidebar-nav-item active" title="Current Chat"><i class="fa-solid fa-message"></i></a></li>
+        <li><a href="saved-chats.html" class="sidebar-nav-item" title="Saved Conversations"><i class="fa-solid fa-bookmark"></i></a></li>
+        <li><a href="settings.html" class="sidebar-nav-item" title="Settings"><i class="fa-solid fa-gear"></i></a></li>
+        <li style="margin-top:auto;"><button id="sidebar-end-session" class="sidebar-nav-item danger-nav-item btn-end-session" title="End Session & Exit"><i class="fa-solid fa-power-off"></i></button></li>
+      </ul>
+      <div id="sidebar-user-avatar" style="width:38px; height:38px; border-radius:50%; overflow:hidden;"></div>
+    </aside>
+
+    <!-- 2. Chat List Panel -->
+    <section class="chat-list-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Conversations</h2>
+        <input type="text" id="chat-search" class="chat-search-input" placeholder="Search rooms & messages...">
+      </div>
+      <div id="recent-chats-list" class="recent-chats-list">
+        <!-- Dynamic chat items -->
+      </div>
+    </section>
+
+    <!-- 3. Main Chat Window -->
+    <main class="main-chat-window">
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="chat-room-info">
+          <div>
+            <h2 id="room-header-name" style="font-size:1.15rem; font-weight:800;">Select or Join a Room</h2>
+            <div style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:0.5rem; margin-top:0.15rem;">
+              <span class="status-dot online"></span>
+              <span id="room-online-count">0 online</span> •
+              <span id="room-code-badge" class="badge badge-ephemeral">Code: ---</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.65rem;">
+          <button id="btn-ai-summary" class="btn btn-glass btn-sm" title="AI Chat Summary"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Summary</button>
+          <button id="btn-share-room" class="btn btn-glass btn-sm" title="Share Invite Link"><i class="fa-solid fa-share-nodes"></i> Share</button>
+          <button id="btn-qr-code" class="btn btn-glass btn-sm" title="Show QR Code"><i class="fa-solid fa-qrcode"></i> QR</button>
+          <button id="btn-save-chat" class="btn btn-primary btn-sm" title="Save Conversation to Database"><i class="fa-solid fa-floppy-disk"></i> Save Chat</button>
+          <button id="btn-end-session-chat" class="btn btn-danger btn-sm btn-end-session" title="End Session & Exit"><i class="fa-solid fa-power-off"></i> End Session</button>
+        </div>
+      </header>
+
+      <!-- Message History Container -->
+      <div id="messages-container" class="messages-container">
+        <!-- Messages will be rendered here dynamically -->
+        <div style="text-align:center; margin:auto;" class="text-muted">
+          <i class="fa-solid fa-lock" style="font-size:2.5rem; margin-bottom:1rem; opacity:0.5;"></i>
+          <p>This room is private and temporary.<br>Messages self-destruct when expired unless explicitly saved.</p>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div id="typing-bar" class="typing-bar" style="visibility:hidden;">
+        <span id="typing-text">Someone is typing...</span>
+      </div>
+
+      <!-- Message Input Dock -->
+      <footer class="input-dock">
+        <label for="file-upload-input" class="btn btn-glass btn-icon" title="Attach File or Media" style="cursor:pointer;">
+          <i class="fa-solid fa-paperclip"></i>
+          <input type="file" id="file-upload-input" style="display:none;">
+        </label>
+
+        <button id="btn-emoji-toggle" class="btn btn-glass btn-icon" title="Insert Emoji"><i class="fa-regular fa-face-smile"></i></button>
+        
+        <textarea id="message-input" class="chat-textarea" placeholder="Type a message... (Enter to send, Shift+Enter for new line)"></textarea>
+
+        <button id="btn-send-message" class="btn btn-primary btn-icon" title="Send Message"><i class="fa-solid fa-paper-plane"></i></button>
+      </footer>
+    </main>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div id="qr-modal" class="modal-backdrop">
+    <div class="modal-box glass-card" style="text-align:center; max-width:420px;">
+      <h3 style="margin-bottom:0.5rem; display:flex; align-items:center; justify-content: center; gap:0.5rem;"><i class="fa-solid fa-qrcode text-gradient"></i> Scan to Join Room</h3>
+      <p class="text-muted" style="font-size:0.85rem; margin-bottom:1.25rem;">Scan this QR code with any mobile device camera to join instantly.</p>
+      
+      <div id="qr-code-display" style="padding:1.25rem; background:#ffffff; display:inline-block; border-radius:16px; margin-bottom:1.25rem; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+        <!-- QR Code Image Rendered Here -->
+      </div>
+
+      <div style="display:flex; justify-content: center; gap:0.75rem; margin-bottom:1rem;">
+        <button id="btn-copy-qr-link" class="btn btn-glass btn-sm"><i class="fa-solid fa-link"></i> Copy Room Link</button>
+        <button id="btn-download-qr" class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i> Download QR</button>
+      </div>
+
+      <button id="btn-close-qr-modal" class="btn btn-secondary btn-sm">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/chat.js"></script>
+</body>
+</html>
