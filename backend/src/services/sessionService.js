@@ -8,9 +8,11 @@ const crypto = require('crypto');
 const generateId = require('../utils/generateId');
 const generateUsername = require('../utils/generateUsername');
 const generateAvatar = require('../utils/generateAvatar');
-const cacheManager = require('../config/redis');
 const Session = require('../models/Session');
 const { JWT_SECRET } = require('../middleware/auth');
+
+// Fast in-memory session cache
+const memorySessions = new Map();
 
 class SessionService {
   async createSession(ipAddress, userNickname) {
@@ -39,8 +41,8 @@ class SessionService {
       expiresAt
     };
 
-    // Store in Redis cache for instant fast lookup
-    await cacheManager.set(`session:${sessionId}`, sessionData, 86400);
+    // Fast in-memory cache
+    memorySessions.set(sessionId, sessionData);
 
     // Save to MongoDB if connected
     if (Session.db.readyState === 1) {
@@ -61,14 +63,16 @@ class SessionService {
   }
 
   async getSession(sessionId) {
-    const cached = await cacheManager.get(`session:${sessionId}`);
-    if (cached) return cached;
+    if (memorySessions.has(sessionId)) {
+      return memorySessions.get(sessionId);
+    }
 
     try {
       const dbSession = await Session.findOne({ sessionId, isActive: true });
       if (dbSession) {
-        await cacheManager.set(`session:${sessionId}`, dbSession.toObject(), 86400);
-        return dbSession.toObject();
+        const sessionObj = dbSession.toObject();
+        memorySessions.set(sessionId, sessionObj);
+        return sessionObj;
       }
     } catch (err) {
       console.warn('[SESSION GET WARN]', err.message);
@@ -87,7 +91,7 @@ class SessionService {
     session.nickname = updatedNickname;
     session.avatar = updatedAvatar;
 
-    await cacheManager.set(`session:${sessionId}`, session, 86400);
+    memorySessions.set(sessionId, session);
 
     try {
       await Session.updateOne({ sessionId }, { nickname: updatedNickname, avatar: updatedAvatar });
@@ -103,7 +107,7 @@ class SessionService {
   }
 
   async terminateSession(sessionId) {
-    await cacheManager.del(`session:${sessionId}`);
+    memorySessions.delete(sessionId);
     try {
       await Session.updateOne({ sessionId }, { isActive: false });
     } catch (err) {

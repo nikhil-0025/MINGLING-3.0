@@ -5,7 +5,6 @@
 
 const bcrypt = require('bcryptjs');
 const generateId = require('../utils/generateId');
-const cacheManager = require('../config/redis');
 const Room = require('../models/Room');
 const Message = require('../models/Message');
 
@@ -43,12 +42,9 @@ class RoomService {
       createdAt: new Date()
     };
 
-    // Store in memory & cache for 100% instant retrieval
+    // Store in memory for instant operations
     memoryRooms.set(roomId, roomData);
     memoryRoomCodes.set(roomCode, roomId);
-
-    await cacheManager.set(`room:${roomId}`, roomData, expiresInHours * 3600);
-    await cacheManager.set(`roomcode:${roomCode}`, roomId, expiresInHours * 3600);
 
     // Save to Mongo if active
     if (Room.db.readyState === 1) {
@@ -74,19 +70,13 @@ class RoomService {
       return memoryRooms.get(roomId);
     }
 
-    const cached = await cacheManager.get(`room:${roomId}`);
-    if (cached) {
-      memoryRooms.set(roomId, cached);
-      return cached;
-    }
-
     if (Room.db.readyState === 1) {
       try {
         const dbRoom = await Room.findOne({ roomId });
         if (dbRoom) {
           const roomObj = dbRoom.toObject();
           memoryRooms.set(roomId, roomObj);
-          await cacheManager.set(`room:${roomId}`, roomObj, 3600);
+          if (roomObj.roomCode) memoryRoomCodes.set(roomObj.roomCode, roomId);
           return roomObj;
         }
       } catch (err) {
@@ -100,11 +90,6 @@ class RoomService {
     const code = roomCode.toUpperCase();
     if (memoryRoomCodes.has(code)) {
       return await this.getRoom(memoryRoomCodes.get(code));
-    }
-
-    const roomId = await cacheManager.get(`roomcode:${code}`);
-    if (roomId) {
-      return await this.getRoom(roomId);
     }
 
     if (Room.db.readyState === 1) {
@@ -180,7 +165,6 @@ class RoomService {
       });
 
       memoryRooms.set(room.roomId, room);
-      await cacheManager.set(`room:${room.roomId}`, room, 3600);
 
       if (Room.db.readyState === 1) {
         try {
@@ -213,10 +197,7 @@ class RoomService {
     memoryRooms.delete(roomId);
     if (room.roomCode) {
       memoryRoomCodes.delete(room.roomCode);
-      await cacheManager.del(`roomcode:${room.roomCode}`);
     }
-
-    await cacheManager.del(`room:${roomId}`);
 
     if (Room.db.readyState === 1) {
       try {

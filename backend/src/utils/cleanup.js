@@ -6,17 +6,13 @@
 const Room = require('../models/Room');
 const Message = require('../models/Message');
 const Session = require('../models/Session');
-const cacheManager = require('../config/redis');
 
 async function runCleanupJob() {
   const now = new Date();
   try {
-    // Delete expired rooms from Mongo
+    // Delete expired rooms and messages from Mongo
     const expiredRooms = await Room.find({ expiresAt: { $lte: now } });
     for (const room of expiredRooms) {
-      await cacheManager.del(`room:${room.roomId}`);
-      await cacheManager.del(`roomcode:${room.roomCode}`);
-      await cacheManager.del(`room_messages:${room.roomId}`);
       await Message.deleteMany({ roomId: room.roomId });
     }
     await Room.deleteMany({ expiresAt: { $lte: now } });

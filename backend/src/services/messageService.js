@@ -4,8 +4,10 @@
  */
 
 const generateId = require('../utils/generateId');
-const cacheManager = require('../config/redis');
 const Message = require('../models/Message');
+
+// In-memory message store per room for instant real-time access
+const memoryMessages = new Map();
 
 class MessageService {
   async createMessage({ roomId, senderSessionId, senderNickname, senderAvatar, content = '', type = 'text', fileUrl = null, fileName = null, fileSize = 0, mimeType = null, replyToMessageId = null }) {
@@ -32,13 +34,13 @@ class MessageService {
       createdAt: new Date()
     };
 
-    // Store in Redis message cache list for room
-    const roomMsgsKey = `room_messages:${roomId}`;
-    const existing = (await cacheManager.get(roomMsgsKey)) || [];
-    existing.push(messageData);
-    // Keep max 200 recent messages in cache
-    if (existing.length > 200) existing.shift();
-    await cacheManager.set(roomMsgsKey, existing, 86400);
+    // Store in memory cache for room
+    if (!memoryMessages.has(roomId)) {
+      memoryMessages.set(roomId, []);
+    }
+    const roomMsgs = memoryMessages.get(roomId);
+    roomMsgs.push(messageData);
+    if (roomMsgs.length > 200) roomMsgs.shift();
 
     // Save to Mongo if available
     if (Message.db.readyState === 1) {
@@ -53,16 +55,17 @@ class MessageService {
   }
 
   async getRoomMessages(roomId) {
-    const cached = await cacheManager.get(`room_messages:${roomId}`);
-    if (cached && Array.isArray(cached) && cached.length > 0) {
-      return cached;
+    if (memoryMessages.has(roomId) && memoryMessages.get(roomId).length > 0) {
+      return memoryMessages.get(roomId);
     }
 
     try {
       const messages = await Message.find({ roomId, expiresAt: { $gt: new Date() } })
         .sort({ createdAt: 1 })
         .limit(100);
-      return messages;
+      const msgObjs = messages.map(m => m.toObject ? m.toObject() : m);
+      memoryMessages.set(roomId, msgObjs);
+      return msgObjs;
     } catch (err) {
       return [];
     }
@@ -77,11 +80,10 @@ class MessageService {
     msg.isEdited = true;
     await msg.save();
 
-    // Sync cache
-    const cached = await cacheManager.get(`room_messages:${msg.roomId}`);
-    if (cached) {
-      const updated = cached.map(m => m.messageId === messageId ? { ...m, content: newContent, isEdited: true } : m);
-      await cacheManager.set(`room_messages:${msg.roomId}`, updated, 86400);
+    // Sync memory
+    if (memoryMessages.has(msg.roomId)) {
+      const updated = memoryMessages.get(msg.roomId).map(m => m.messageId === messageId ? { ...m, content: newContent, isEdited: true } : m);
+      memoryMessages.set(msg.roomId, updated);
     }
 
     return msg.toObject();
@@ -95,11 +97,10 @@ class MessageService {
     const roomId = msg.roomId;
     await Message.deleteOne({ messageId });
 
-    // Sync cache
-    const cached = await cacheManager.get(`room_messages:${roomId}`);
-    if (cached) {
-      const filtered = cached.filter(m => m.messageId !== messageId);
-      await cacheManager.set(`room_messages:${roomId}`, filtered, 86400);
+    // Sync memory
+    if (memoryMessages.has(roomId)) {
+      const filtered = memoryMessages.get(roomId).filter(m => m.messageId !== messageId);
+      memoryMessages.set(roomId, filtered);
     }
 
     return { messageId, roomId };
@@ -121,6 +122,13 @@ class MessageService {
     }
 
     await msg.save();
+
+    // Sync memory
+    if (memoryMessages.has(msg.roomId)) {
+      const updated = memoryMessages.get(msg.roomId).map(m => m.messageId === messageId ? msg.toObject() : m);
+      memoryMessages.set(msg.roomId, updated);
+    }
+
     return msg.toObject();
   }
 }

@@ -1,25 +1,46 @@
 /**
- * MongoDB Atlas / Mongoose Configuration
+ * MongoDB Atlas & Compass Mongoose Configuration
  * (database.js)
  */
 
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  const atlasUri = process.env.MONGODB_URI;
+  const localUri = 'mongodb://127.0.0.1:27017/mingling';
+
+  if (atlasUri) {
+    try {
+      const conn = await mongoose.connect(atlasUri, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      });
+      console.log(`[DATABASE] Connected to MongoDB Atlas: ${conn.connection.host} (${conn.connection.name})`);
+      return;
+    } catch (error) {
+      console.warn(`[DATABASE WARN] MongoDB Atlas connection failed (${error.message}). Trying local Compass fallback...`);
+    }
+  }
+
   try {
-    const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mingling';
-    // Disable command buffering globally so DB operations fail fast when offline
-    mongoose.set('bufferCommands', false);
-
-    const conn = await mongoose.connect(connStr, {
-      serverSelectionTimeoutMS: 2000 // 2s fast timeout
+    const conn = await mongoose.connect(localUri, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
-
-    console.log(`[DATABASE] MongoDB Connected: ${conn.connection.host}`);
+    console.log(`[DATABASE] Connected to Local MongoDB (Compass): ${conn.connection.host} (${conn.connection.name})`);
   } catch (error) {
-    console.warn(`[DATABASE WARNING] MongoDB connection failed: ${error.message}. Operating in high-performance memory fallback state.`);
+    console.error(`[DATABASE ERROR] Local MongoDB connection failed: ${error.message}`);
   }
 };
 
-module.exports = connectDB;
+mongoose.connection.on('disconnected', () => {
+  console.warn('[DATABASE WARNING] MongoDB disconnected. Attempting reconnection...');
+});
 
+mongoose.connection.on('reconnected', () => {
+  console.log('[DATABASE] MongoDB reconnected successfully.');
+});
+
+module.exports = connectDB;
