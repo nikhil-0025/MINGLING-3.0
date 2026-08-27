@@ -42,33 +42,35 @@ class MessageService {
     roomMsgs.push(messageData);
     if (roomMsgs.length > 200) roomMsgs.shift();
 
-    // Save to Mongo if available
-    if (Message.db.readyState === 1) {
-      try {
-        await Message.create(messageData);
-      } catch (err) {
-        console.warn('[MSG CREATE DB WARN]', err.message);
-      }
+    // Save to MongoDB Atlas
+    try {
+      await Message.create(messageData);
+    } catch (err) {
+      console.warn('[MSG CREATE DB WARN]', err.message);
     }
 
     return messageData;
   }
 
   async getRoomMessages(roomId) {
-    if (memoryMessages.has(roomId) && memoryMessages.get(roomId).length > 0) {
-      return memoryMessages.get(roomId);
-    }
-
     try {
       const messages = await Message.find({ roomId, expiresAt: { $gt: new Date() } })
         .sort({ createdAt: 1 })
         .limit(100);
-      const msgObjs = messages.map(m => m.toObject ? m.toObject() : m);
-      memoryMessages.set(roomId, msgObjs);
-      return msgObjs;
+      if (messages && messages.length > 0) {
+        const msgObjs = messages.map(m => m.toObject ? m.toObject() : m);
+        memoryMessages.set(roomId, msgObjs);
+        return msgObjs;
+      }
     } catch (err) {
-      return [];
+      console.warn('[MSG GET DB WARN]', err.message);
     }
+
+    if (memoryMessages.has(roomId)) {
+      return memoryMessages.get(roomId);
+    }
+
+    return [];
   }
 
   async editMessage(messageId, senderSessionId, newContent) {

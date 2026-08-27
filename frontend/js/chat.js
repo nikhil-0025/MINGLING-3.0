@@ -40,6 +40,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('room-header-name').textContent = roomData.data.name;
       document.getElementById('room-code-badge').textContent = `Code: ${roomData.data.roomCode}`;
       document.getElementById('room-online-count').textContent = `${roomData.data.participants?.length || 1} members`;
+    } else {
+      showToast(roomData.message || 'Room not found or has expired', 'error');
+      setTimeout(() => {
+        window.location.href = 'room.html';
+      }, 1500);
+      return;
     }
 
     const msgRes = await fetch(`/api/messages/room/${roomId}`, {

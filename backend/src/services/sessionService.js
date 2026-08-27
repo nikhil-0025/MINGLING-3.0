@@ -44,13 +44,11 @@ class SessionService {
     // Fast in-memory cache
     memorySessions.set(sessionId, sessionData);
 
-    // Save to MongoDB if connected
-    if (Session.db.readyState === 1) {
-      try {
-        await Session.create(sessionData);
-      } catch (err) {
-        console.warn('[SESSION DB WARN] Could not persist session to Mongo:', err.message);
-      }
+    // Save to MongoDB Atlas
+    try {
+      await Session.create(sessionData);
+    } catch (err) {
+      console.warn('[SESSION DB WARN] Could not persist session to Mongo:', err.message);
     }
 
     return {

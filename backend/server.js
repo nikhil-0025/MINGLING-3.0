@@ -44,6 +44,15 @@ app.set('io', io);
 connectDB();
 
 // Middleware Pipeline
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('[DB MID WARN]', err.message);
+  }
+  next();
+});
+
 app.use(helmet({
   contentSecurityPolicy: false // Disabled for CDN font/icon compatibility
 }));
@@ -85,10 +94,14 @@ initializeSockets(io);
 // Periodic cleanup timer every 30 minutes
 setInterval(runCleanupJob, 30 * 60 * 1000);
 
-const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`🚀 MINGLING REAL-TIME MESSAGING SERVER RUNNING ON PORT ${PORT}`);
-  console.log(`🌐 URL: http://localhost:${PORT}`);
-  console.log(`=======================================================`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 5001;
+  server.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`🚀 MINGLING REAL-TIME MESSAGING SERVER RUNNING ON PORT ${PORT}`);
+    console.log(`🌐 URL: http://localhost:${PORT}`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;

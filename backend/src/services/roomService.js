@@ -42,17 +42,15 @@ class RoomService {
       createdAt: new Date()
     };
 
-    // Store in memory for instant operations
+    // Store in memory for instant access
     memoryRooms.set(roomId, roomData);
     memoryRoomCodes.set(roomCode, roomId);
 
-    // Save to Mongo if active
-    if (Room.db.readyState === 1) {
-      try {
-        await Room.create(roomData);
-      } catch (err) {
-        console.warn('[ROOM CREATE DB WARN]', err.message);
-      }
+    // Save to MongoDB Atlas
+    try {
+      await Room.create(roomData);
+    } catch (err) {
+      console.warn('[ROOM CREATE DB WARN]', err.message);
     }
 
     return {
@@ -70,18 +68,16 @@ class RoomService {
       return memoryRooms.get(roomId);
     }
 
-    if (Room.db.readyState === 1) {
-      try {
-        const dbRoom = await Room.findOne({ roomId });
-        if (dbRoom) {
-          const roomObj = dbRoom.toObject();
-          memoryRooms.set(roomId, roomObj);
-          if (roomObj.roomCode) memoryRoomCodes.set(roomObj.roomCode, roomId);
-          return roomObj;
-        }
-      } catch (err) {
-        console.warn('[ROOM GET DB WARN]', err.message);
+    try {
+      const dbRoom = await Room.findOne({ roomId });
+      if (dbRoom) {
+        const roomObj = dbRoom.toObject();
+        memoryRooms.set(roomId, roomObj);
+        if (roomObj.roomCode) memoryRoomCodes.set(roomObj.roomCode, roomId);
+        return roomObj;
       }
+    } catch (err) {
+      console.warn('[ROOM GET DB WARN]', err.message);
     }
     return null;
   }
@@ -92,45 +88,41 @@ class RoomService {
       return await this.getRoom(memoryRoomCodes.get(code));
     }
 
-    if (Room.db.readyState === 1) {
-      try {
-        const dbRoom = await Room.findOne({ roomCode: code });
-        if (dbRoom) {
-          const roomObj = dbRoom.toObject();
-          memoryRooms.set(roomObj.roomId, roomObj);
-          memoryRoomCodes.set(code, roomObj.roomId);
-          return roomObj;
-        }
-      } catch (err) {
-        console.warn('[ROOM CODE GET WARN]', err.message);
+    try {
+      const dbRoom = await Room.findOne({ roomCode: code });
+      if (dbRoom) {
+        const roomObj = dbRoom.toObject();
+        memoryRooms.set(roomObj.roomId, roomObj);
+        memoryRoomCodes.set(code, roomObj.roomId);
+        return roomObj;
       }
+    } catch (err) {
+      console.warn('[ROOM CODE GET WARN]', err.message);
     }
     return null;
   }
 
   async listPublicRooms() {
     const now = new Date();
-    // Return memory rooms if active
+
+    try {
+      const rooms = await Room.find({ isPrivate: false, expiresAt: { $gt: now } })
+        .select('roomId roomCode name participants expiresAt createdAt')
+        .sort({ createdAt: -1 })
+        .limit(20);
+      if (rooms && rooms.length > 0) {
+        return rooms;
+      }
+    } catch (err) {
+      console.warn('[ROOM LIST DB WARN]', err.message);
+    }
+
+    // Fallback to memory rooms if DB yields nothing
     const activeMemRooms = Array.from(memoryRooms.values())
       .filter(r => !r.isPrivate && new Date(r.expiresAt) > now)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    if (activeMemRooms.length > 0) {
-      return activeMemRooms;
-    }
-
-    if (Room.db.readyState === 1) {
-      try {
-        const rooms = await Room.find({ isPrivate: false, expiresAt: { $gt: now } })
-          .select('roomId roomCode name participants expiresAt createdAt')
-          .sort({ createdAt: -1 })
-          .limit(20);
-        return rooms;
-      } catch (err) {
-        return [];
-      }
-    }
-    return [];
+    return activeMemRooms;
   }
 
   async joinRoom(roomIdentifier, password = null, sessionUser) {
@@ -166,12 +158,10 @@ class RoomService {
 
       memoryRooms.set(room.roomId, room);
 
-      if (Room.db.readyState === 1) {
-        try {
-          await Room.updateOne({ roomId: room.roomId }, { participants: room.participants });
-        } catch (err) {
-          console.warn('[ROOM JOIN DB WARN]', err.message);
-        }
+      try {
+        await Room.updateOne({ roomId: room.roomId }, { participants: room.participants });
+      } catch (err) {
+        console.warn('[ROOM JOIN DB WARN]', err.message);
       }
     }
 
@@ -199,13 +189,11 @@ class RoomService {
       memoryRoomCodes.delete(room.roomCode);
     }
 
-    if (Room.db.readyState === 1) {
-      try {
-        await Room.deleteOne({ roomId });
-        await Message.deleteMany({ roomId });
-      } catch (err) {
-        console.warn('[ROOM DEL DB WARN]', err.message);
-      }
+    try {
+      await Room.deleteOne({ roomId });
+      await Message.deleteMany({ roomId });
+    } catch (err) {
+      console.warn('[ROOM DEL DB WARN]', err.message);
     }
   }
 }
